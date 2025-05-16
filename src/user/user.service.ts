@@ -31,18 +31,23 @@ export class UserServiceMockImpl implements UserService {
   }
 }
 
-const instance = axios.create({
-  timeout: 5000,
-});
+// const instance = axios.create({
+//   timeout: 5000,
+// });
 
 @Injectable()
 export class UserServiceBackendImpl implements UserService {
   private readonly logger = new Logger(UserServiceBackendImpl.name);
+  private _api: AppUserEntityControllerApi;
+
+  constructor() {
+    this._api = new AppUserEntityControllerApi();
+    // this._api = new AppUserEntityControllerApi(undefined, undefined, instance);
+  }
 
   async findAll(): Promise<Array<EntityModelAppUser>> {
-    const api = new AppUserEntityControllerApi(undefined, undefined, instance);
     try {
-      const response = await api.getCollectionResourceAppuserGet1();
+      const response = await this._api.getCollectionResourceAppuserGet1();
       const data = response.data;
       if (data._embedded?.user) {
         console.table(data._embedded.user);
@@ -60,9 +65,8 @@ export class UserServiceBackendImpl implements UserService {
   }
 
   async findById(id: string): Promise<EntityModelAppUser | undefined> {
-    const api = new AppUserEntityControllerApi(undefined, undefined, instance);
     try {
-      const response = await api.getItemResourceAppuserGet(id);
+      const response = await this._api.getItemResourceAppuserGet(id);
       this.logger.debug(response.data);
       return response.data;
     } catch (error) {

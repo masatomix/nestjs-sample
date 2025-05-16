@@ -339,6 +339,10 @@ package.jsonの scriptsに、``"docs": "spectaql spectaql.yml"``を追加して 
 
 ## Backend接続
 
+https://qiita.com/masatomix/items/53003a34d413206bb619
+のBackendサーバ(REST)に接続するサンプル。
+
+NestJSは RxJS 推奨っぽいけど、Axiosでいきます。
 
 ```
 $ pnpm add axios
@@ -351,3 +355,40 @@ $ curl http://localhost:8080/v3/api-docs -o api-docs.json
 $ openapi-generator-cli generate -i api-docs.json -g typescript-axios -o ./src/generated/
 ```
 
+https://github.com/masatomix/nestjs-sample/commit/bcb3a2ae147cc1e172ab2ac8abe3af5b21a64b8e これらのコード変更後、
+
+```
+$ curl 'http://localhost:3000/graphql' -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Connection: keep-alive' -H 'DNT: 1' -H 'Origin: http://localhost:3000' --data-binary '{"query":"query {\n  findAllUsers{\n     name\n  }\n  \n  findUserById(id:\"u001\"){\n    name\n    age\n  }\n}\n"}' --compressed | jq
+
+
+{
+  "data": {
+    "findAllUsers": [
+      {
+        "name": "木野1"
+      },
+      {
+        "name": "木野2"
+      },
+      {
+        "name": "木野3"
+      },
+      {
+        "name": "佐藤1"
+      },
+      {
+        "name": "佐藤2"
+      },
+      {
+        "name": "佐藤3"
+      }
+    ],
+    "findUserById": {
+      "name": "木野1",
+      "age": 48
+    }
+  }
+}
+```
+
+Backendから値がとれました！
