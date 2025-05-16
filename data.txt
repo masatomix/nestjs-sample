@@ -1,0 +1,14 @@
+{
+  "query":
+  "query {
+    findAllUsers{
+       name
+    }
+  
+    findUserById(id:\"3\"){
+      name
+      age
+    }
+  }
+"
+}

@@ -1,0 +1,13 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  name: String!
+  age: Int!
+}
+
+type Query {
+  findUserById(id: String!): User
+  findAllUsers: [User!]!
+}

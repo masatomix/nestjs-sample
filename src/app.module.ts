@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
+import { UserModule } from "./user/user.module";
 
 @Module({
   imports: [
@@ -9,6 +10,7 @@ import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
       // autoSchemaFile: true,
       autoSchemaFile: "src/schema.gql", // ← スキーマをファイル出力
     }),
+    UserModule,
   ],
 })
 export class AppModule {}

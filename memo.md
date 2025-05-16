@@ -13,7 +13,7 @@ The `pnpm' command exists in these Node versions:
   21.7.3
   22.2.0
 
-$ npm install -g pnpm
+$ npm install -g pnpm 
 
 added 1 package in 931ms
 
@@ -89,4 +89,212 @@ nestjs-sample $
 
 ```
 $ pnpm add @nestjs/graphql @nestjs/apollo graphql
+```
+
+
+```
+$ nest g module user
+nest g service user
+nest g resolver user
+nest g class user
+
+CREATE src/user/user.module.ts (81 bytes)
+UPDATE src/app.module.ts (501 bytes)
+CREATE src/user/user.service.spec.ts (446 bytes)
+CREATE src/user/user.service.ts (88 bytes)
+UPDATE src/user/user.module.ts (155 bytes)
+CREATE src/user/user.resolver.spec.ts (456 bytes)
+CREATE src/user/user.resolver.ts (86 bytes)
+UPDATE src/user/user.module.ts (217 bytes)
+CREATE src/user/user.spec.ts (139 bytes)
+CREATE src/user/user.ts (21 bytes)
+$
+```
+
+
+```:src/user/user.ts
+import { Field, Int, ObjectType } from "@nestjs/graphql";
+
+@ObjectType()
+export class User {
+  @Field()
+  name: string;
+
+  @Field(() => Int)
+  age: number;
+}
+
+```
+
+```
+$ touch src/mock-data.ts
+```
+
+```:src/mock-data.ts
+import { UserRecord } from "./user/user.service";
+
+export const mockRecords: UserRecord[] = [
+  {
+    id: "1",
+    firstName: "John",
+    lastName: "Doe",
+    age: 30,
+  },
+  {
+    id: "2",
+    firstName: "Jane",
+    lastName: "Smith",
+    age: 25,
+  },
+  {
+    id: "3",
+    firstName: "Alice",
+    lastName: "Johnson",
+    age: 28,
+  },
+];
+
+```
+
+```:src/user/user.service.ts
+import { Injectable } from "@nestjs/common";
+import { mockRecords } from "src/mock-data";
+
+export type UserRecord = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+};
+
+@Injectable()
+export class UserService {
+  findAll() {
+    return mockRecords;
+  }
+
+  findById(id: string) {
+    return mockRecords.find((record) => record.id === id);
+  }
+}
+
+```
+
+```:src/user/user.resolver.ts
+
+import { Logger } from "@nestjs/common";
+import { Args, Parent, Query, ResolveField, Resolver } from "@nestjs/graphql";
+import { User } from "./user";
+import { UserRecord, UserService } from "./user.service";
+
+@Resolver(() => User)
+export class UserResolver {
+  private readonly logger = new Logger(UserResolver.name);
+
+  constructor(private readonly _userService: UserService) {}
+
+  @Query(() => User, { nullable: true, name: "findUserById" })
+  findOne(@Args("id") id: string) {
+    this.logger.debug(`findOne called with id: ${id}`);
+    return this._userService.findById(id);
+  }
+
+  @Query(() => [User]) // name がないとメソッド名がそのままクエリ名に。
+  findAllUsers() {
+    this.logger.debug(`findAll called`);
+    return this._userService.findAll();
+  }
+
+  @ResolveField(() => String)
+  name(@Parent() userRecord: UserRecord): string {
+    this.logger.debug(`method name called`);
+    return `${userRecord.firstName} ${userRecord.lastName}`;
+  }
+}
+
+```
+
+
+```:src/app.module.ts 
+import { Module } from "@nestjs/common";
+import { GraphQLModule } from "@nestjs/graphql";
+import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
+import { UserModule } from "./user/user.module";
+
+@Module({
+  imports: [
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver, // ★これを追加！
+      // autoSchemaFile: true,
+      autoSchemaFile: "src/schema.gql", // ← スキーマをファイル出力
+    }),
+    UserModule,
+  ],
+})
+export class AppModule {}
+```
+
+```
+$ pnpm run start:dev
+[10:05:38 PM] Starting compilation in watch mode...
+
+[10:05:40 PM] Found 0 errors. Watching for file changes.
+
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [InstanceLoader] AppModule dependencies initialized +12ms
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [InstanceLoader] SampleEntityModule dependencies initialized +1ms
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [InstanceLoader] GraphQLSchemaBuilderModule dependencies initialized +0ms
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [InstanceLoader] GraphQLModule dependencies initialized +0ms
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [GraphQLModule] Mapped {/graphql, POST} route +52ms
+[Nest] 231525  - 05/14/2025, 10:05:40 PM     LOG [NestApplication] Nest application successfully started +0ms
+```
+
+
+![image-20250516142942600.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/73777/9bd7cd25-68cc-4574-9c82-20c14ba0e71b.png)
+
+
+```
+$ cat data.txt 
+{
+  "query":
+  "query {
+    findAllUsers{
+       name
+    }
+  
+    findUserById(id:\"3\"){
+      name
+      age
+    }
+  }
+"
+}
+
+$ cat data.txt | curl --data @-  \\
+  --request POST \
+  --header 'content-type: application/json' \
+  --url http://localhost:3000/graphql | jq
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   256  100   144  100   112  25536  19861 --:--:-- --:--:-- --:--:-- 42666
+{
+  "data": {
+    "findAllUsers": [
+      {
+        "name": "John Doe"
+      },
+      {
+        "name": "Jane Smith"
+      },
+      {
+        "name": "Alice Johnson"
+      }
+    ],
+    "findUserById": {
+      "name": "Alice Johnson",
+      "age": 28
+    }
+  }
+}
 ```
