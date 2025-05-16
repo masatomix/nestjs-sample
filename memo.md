@@ -81,5 +81,12 @@ $ pnpm run start
                                          
 $ cd nestjs-sample/
 nestjs-sample $ 
+```
 
+
+## GraphQLをセットアップする
+
+
+```
+$ pnpm add @nestjs/graphql @nestjs/apollo graphql
 ```
