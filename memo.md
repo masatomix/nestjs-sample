@@ -335,3 +335,19 @@ public/index.html を開いてみると、、
 
 package.jsonの scriptsに、``"docs": "spectaql spectaql.yml"``を追加して ``pnpm run docs`` とかで実行しても良いかもです。
 
+
+
+## Backend接続
+
+
+```
+$ pnpm add axios
+$ pnpm add -D @types/axios
+
+Backend起動状態で、
+
+
+$ curl http://localhost:8080/v3/api-docs -o api-docs.json
+$ openapi-generator-cli generate -i api-docs.json -g typescript-axios -o ./src/generated/
+```
+

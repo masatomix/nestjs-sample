@@ -1,20 +1,20 @@
-import { UserRecord } from "./user/user.service";
+import { EntityModelAppUser } from "./generated";
 
-export const mockRecords: UserRecord[] = [
+export const mockRecords: EntityModelAppUser[] = [
   {
-    id: "1",
+    userId: "1",
     firstName: "John",
     lastName: "Doe",
     age: 30,
   },
   {
-    id: "2",
+    userId: "2",
     firstName: "Jane",
     lastName: "Smith",
     age: 25,
   },
   {
-    id: "3",
+    userId: "3",
     firstName: "Alice",
     lastName: "Johnson",
     age: 28,
