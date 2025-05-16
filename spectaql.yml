@@ -1,0 +1,8 @@
+introspection:
+  url: http://localhost:3000/graphql
+  # schemaFile: ./src/schema.gql
+
+info:
+  title: My GraphQL API
+  description: Generated via SpectaQL
+  version: 1.0.0

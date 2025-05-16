@@ -298,3 +298,40 @@ $ cat data.txt | curl --data @-  \\
   }
 }
 ```
+
+```
+$ curl 'http://localhost:3000/graphql' -H 'Accept-Encoding: gzip, deflate, br' -H 'Content-Type: application/json' -H 'Accept: application/json' -H 'Connection: keep-alive' -H 'DNT: 1' -H 'Origin: http://localhost:3000' --data-binary '{"query":"query {\n  findAllUsers{\n     name\n  }\n  \n  findUserById(id:\"3\"){\n    name\n    age\n  }\n}\n"}' --compressed | jq
+```
+
+## SpectaQL 導入
+
+
+```
+$ pnpm add -D spectaql
+$ touch spectaql.yml 
+$ cat spectaql.yml 
+introspection:
+  url: http://localhost:3000/graphql
+  # schemaFile: ./src/schema.gql
+
+info:
+  title: My GraphQL API
+  description: Generated via SpectaQL
+  version: 1.0.0
+```
+
+``pnpm run start:dev`` で起動した状態で別コンソールから、
+
+```
+$ npx spectaql spectaql.yml
+```
+
+public/index.html を開いてみると、、
+
+![image-20250516160916001.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/73777/b6557371-9ad6-476b-8576-2fcb6e9f5eb8.png)
+
+
+表示されました。
+
+package.jsonの scriptsに、``"docs": "spectaql spectaql.yml"``を追加して ``pnpm run docs`` とかで実行しても良いかもです。
+
