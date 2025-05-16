@@ -8,8 +8,13 @@ export type UserRecord = {
   age: number;
 };
 
+export abstract class UserService {
+  abstract findAll(): Array<UserRecord>;
+  abstract findById(id: string): UserRecord | undefined;
+}
+
 @Injectable()
-export class UserService {
+export class UserServiceMockImpl implements UserService {
   findAll() {
     return mockRecords;
   }
